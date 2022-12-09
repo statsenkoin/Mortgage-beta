@@ -108,17 +108,18 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 250px;
+  gap: 10px;
+  width: 380px;
+  height: 120px;
   margin-bottom: 5px;
 }
+
 img {
   display: inline-block;
   max-width: 100%;
   height: auto;
 }
-.item-logo {
-  /* background-color: aqua; */
-}
+
 .item-title {
   font-size: 32px;
   text-transform: uppercase;
