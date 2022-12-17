@@ -86,6 +86,7 @@ const userBanks = [
     logo: 'ukrgaz.png',
   },
 ];
+
 let choosenBank = null;
 
 // ===== initial markup =====
