@@ -103,7 +103,7 @@ rootRef.addEventListener('click', onElementClick);
 const bankList = document.querySelector('.bank-list');
 const bankInfo = document.querySelector('.bank-info');
 
-// ===== markup favorite list =====
+// ===== markup initial favorite list =====
 bankList.innerHTML = renderBankList(userBanks);
 
 // ===== functions =====
@@ -116,9 +116,16 @@ function renderBankList(userBankList) {
     </li>`
     : userBankList
         .map(
-          (el) => `<li class = "bank__name" id="${el.id}">
-      <img class="bank__image" src="./img/${el.logo}" 
-           alt="логотип ${el.name} банку" width="50"/>${el.name}</li>`
+          (el) =>
+            `<li class = "bank__name" id="${el.id}">
+                <img
+                  class="bank__image"
+                  src="./img/${el.logo}" 
+                  alt="логотип ${el.name} банку" 
+                  width="50"
+                />
+                ${el.name}
+            </li>`
         )
         .join('');
   return (bankList.innerHTML = markup);
