@@ -55,39 +55,42 @@ const banks = [
 ];
 
 // ===============================================================================
-// const userBanks = [];
+let userBanks = [];
 
-const userBanks = [
-  {
-    id: 'qwsfw342rew5',
-    name: 'NBU',
-    interestRate: 4,
-    maxLoan: 1000000,
-    minPayment: 6000,
-    loanTerm: 60,
-    logo: 'nbu.png',
-  },
-  {
-    id: 'ew5r3442rw5',
-    name: 'Oschad',
-    interestRate: 6,
-    maxLoan: 1000000,
-    minPayment: 6000,
-    loanTerm: 60,
-    logo: 'oschad.png',
-  },
-  {
-    id: '42rw5ew5r34',
-    name: 'Ukrgaz',
-    interestRate: 5,
-    maxLoan: 750000,
-    minPayment: 4000,
-    loanTerm: 36,
-    logo: 'ukrgaz.png',
-  },
-];
+// let userBanks = [
+//   {
+//     id: 'qwsfw342rew5',
+//     name: 'NBU',
+//     interestRate: 4,
+//     maxLoan: 1000000,
+//     minPayment: 6000,
+//     loanTerm: 60,
+//     logo: 'nbu.png',
+//   },
+//   {
+//     id: 'ew5r3442rw5',
+//     name: 'Oschad',
+//     interestRate: 6,
+//     maxLoan: 1000000,
+//     minPayment: 6000,
+//     loanTerm: 60,
+//     logo: 'oschad.png',
+//   },
+//   {
+//     id: '42rw5ew5r34',
+//     name: 'Ukrgaz',
+//     interestRate: 5,
+//     maxLoan: 750000,
+//     minPayment: 4000,
+//     loanTerm: 36,
+//     logo: 'ukrgaz.png',
+//   },
+// ];
 
 let choosenBank = null;
+let form = null;
+
+let inputBank;
 
 // ===== initial markup =====
 const rootRef = document.querySelector('#root');
@@ -136,11 +139,13 @@ function onElementClick(e) {
   const elem = e.target;
 
   if (elem.classList.contains('btn-add')) {
-    addUserBank(elem);
+    inputBank = addUserBankMarkUp();
   } else if (elem.classList.contains('btn-edit')) {
     onBankEdit(choosenBank);
   } else if (elem.classList.contains('btn-delete')) {
     onBankDelete(choosenBank);
+  } else if (elem.classList.contains('btn-addbank')) {
+    onAddBank(inputBank);
   } else if (
     elem.classList.contains('bank__name') ||
     elem.classList.contains('bank__image')
@@ -151,7 +156,7 @@ function onElementClick(e) {
 }
 
 function findUserBank(elem) {
-  return banks.find((bank) => {
+  return userBanks.find((bank) => {
     // перевіряє клік на <img> logo і спрямовує клік на батьківський <li>
     if (
       elem.classList.contains('bank__image') &&
@@ -164,7 +169,7 @@ function findUserBank(elem) {
 }
 
 function onBankInfoMarkup(bank) {
-  console.log('choosen bank :>> ', bank);
+  // console.log('choosen bank :>> ', bank);
   if (!bank) {
     bankInfo.innerHTML = '';
   } else {
@@ -180,18 +185,110 @@ function onBankInfoMarkup(bank) {
   }
 }
 
-function addUserBank(elem) {
-  // !!!TODO
-  console.log('element :>> ', elem);
+function addUserBankMarkUp() {
   // https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_datalist
+
+  const options = banks
+    .map((bank) => `<option value="${bank.name}"></option>`)
+    .join('');
+
+  const markup = `
+  <input type="text" list="banklist" class="input-addbank"/>
+    <datalist id="banklist">${options}</datalist>
+  <button  class="btn btn-addbank">Додати банк до списку</button>
+    `;
+  bankInfo.innerHTML = markup;
+
+  return document.querySelector('.input-addbank');
+}
+
+function onAddBank(input) {
+  // console.log('bank :>> ', input.value);
+  const newBank = banks.find((bank) => input.value === bank.name);
+  userBanks = [...userBanks, { ...newBank }];
+  renderBankList(userBanks);
+  choosenBank = userBanks.find((bank) => input.value === bank.name);
+  onBankInfoMarkup(choosenBank);
 }
 
 function onBankEdit(bank) {
-  // !!!TODO
-  console.log('bank :>> ', bank);
+  // console.log('bank :>> ', bank);
+  onBankEditMarkUp(bank);
+  form = document.querySelector('.form-edit');
+
+  // form.addEventListener('submit', onAddBankSubmit, { once: true });
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // !!!TODO
+    const newBank = { ...bank };
+    const randomID = randomiseID();
+    newBank.id = bank.id + randomID;
+
+    newBank.name =
+      bank.name === form.name.value
+        ? form.name.value + randomID
+        : form.name.value;
+
+    newBank.maxLoan = Number(form.maxLoan.value);
+    newBank.interestRate = Number(form.interestRate.value);
+    newBank.minPayment = Number(form.minPayment.value);
+    newBank.loanTerm = Number(form.loanTerm.value);
+    userBanks = [...userBanks, newBank];
+
+    // console.log('banks :>> ', banks);
+    // console.log('userBanks :>> ', userBanks);
+    renderBankList(userBanks);
+    bankInfo.innerHTML = '';
+    // !!!TODO
+  });
+}
+
+let newID = 0;
+function randomiseID() {
+  newID += 1;
+  return newID.toString();
+}
+
+function onBankEditMarkUp(bank) {
+  const markup = `<form class="form-edit">
+      <label class="label-edit">
+        Назва банку: 
+          <input class="input-edit" type="text" name="name"
+                value="${bank.name}"/>
+         bank
+      </label>
+      <label class="label-edit">
+        Сума займу: 
+          <input class="input-edit" type="number" min="0" name="maxLoan"
+                value="${bank.maxLoan}"/>
+         грн.
+      </label>
+      <label class="label-edit">
+        Відсоткова ставка: 
+          <input class="input-edit" type="number" min="0" name="interestRate"
+                value="${bank.interestRate}"/>
+         %
+      </label>
+      <label class="label-edit">
+        Мінімальний платіж: 
+          <input class="input-edit" type="number" min="0" name="minPayment"
+                value="${bank.minPayment}"/>
+         грн.
+      </label>
+      <label class="label-edit">
+        Строк займу: 
+          <input class="input-edit" type="number" min="0" name="loanTerm"
+                value="${bank.loanTerm}"/>
+         місяців.
+      </label>
+      <button type="submit" class="btn btn-editbank">Зберегти зміни</button>
+    </form>`;
+  bankInfo.innerHTML = markup;
 }
 
 function onBankDelete(bank) {
+  // console.log('bank :>> ', bank);
   const bankIndex = userBanks.findIndex((item) => item.id === bank.id);
   userBanks.splice(bankIndex, 1);
   choosenBank = null;
