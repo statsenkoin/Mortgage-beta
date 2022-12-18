@@ -110,3 +110,29 @@ a {
   font-weight: 400;
   text-transform: none;
 }
+
+.input-addbank {
+  font-size: 22px;
+  background-color: beige;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.form-edit {
+  height: 100%;
+}
+
+.label-edit {
+  display: block;
+}
+
+.input-edit {
+  width: 120px;
+  font-size: 22px;
+  text-align: end;
+}
+
+.btn-editbank {
+  width: 100%;
+  margin-top: 50px;
+}
