@@ -85,6 +85,8 @@ a {
 }
 
 .btn {
+  display: block;
+  width: 100%;
   margin-top: auto;
   padding: 10px;
   font-size: 20px;
@@ -100,9 +102,9 @@ a {
 }
 
 .btn-edit,
-.btn-delete {
+.btn-delete,
+.btn-cancel {
   margin-top: 10px;
-  width: 100%;
 }
 
 .bank__image {
@@ -119,6 +121,8 @@ a {
 }
 
 .form-edit {
+  display: flex;
+  flex-direction: column;
   height: 100%;
 }
 
@@ -133,6 +137,5 @@ a {
 }
 
 .btn-editbank {
-  width: 100%;
-  margin-top: 50px;
+  margin-top: auto;
 }
