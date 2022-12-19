@@ -55,42 +55,36 @@ const banks = [
 ];
 
 // ===============================================================================
+// let userBanks = [];
+// =======localeStorage===========================================================
 let userBanks = [];
-
-// let userBanks = [
-//   {
-//     id: 'qwsfw342rew5',
-//     name: 'NBU',
-//     interestRate: 4,
-//     maxLoan: 1000000,
-//     minPayment: 6000,
-//     loanTerm: 60,
-//     logo: 'nbu.png',
-//   },
-//   {
-//     id: 'ew5r3442rw5',
-//     name: 'Oschad',
-//     interestRate: 6,
-//     maxLoan: 1000000,
-//     minPayment: 6000,
-//     loanTerm: 60,
-//     logo: 'oschad.png',
-//   },
-//   {
-//     id: '42rw5ew5r34',
-//     name: 'Ukrgaz',
-//     interestRate: 5,
-//     maxLoan: 750000,
-//     minPayment: 4000,
-//     loanTerm: 36,
-//     logo: 'ukrgaz.png',
-//   },
-// ];
+if (getUserBanks('user-banks')) {
+  userBanks = getUserBanks('user-banks');
+} else {
+  saveUserBanks('user-banks', []);
+}
+function saveUserBanks(key, value) {
+  try {
+    const serializedState = JSON.stringify(value);
+    localStorage.setItem(key, serializedState);
+  } catch (error) {
+    console.error('Set state error: ', error.message);
+  }
+}
+function getUserBanks(key) {
+  try {
+    const serializedState = localStorage.getItem(key);
+    return serializedState === null ? undefined : JSON.parse(serializedState);
+  } catch (error) {
+    console.error('Get state error: ', error.message);
+  }
+}
+// ==============================================================================
 
 let choosenBank = null;
-let form = null;
+let formEdit = null;
 
-let inputBank;
+let bankToUserBanks;
 
 // ===== initial markup =====
 const rootRef = document.querySelector('#root');
@@ -139,13 +133,15 @@ function onElementClick(e) {
   const elem = e.target;
 
   if (elem.classList.contains('btn-add')) {
-    inputBank = addUserBankMarkUp();
+    bankToUserBanks = addUserBankMarkUp();
   } else if (elem.classList.contains('btn-edit')) {
     onBankEdit(choosenBank);
   } else if (elem.classList.contains('btn-delete')) {
     onBankDelete(choosenBank);
   } else if (elem.classList.contains('btn-addbank')) {
-    onAddBank(inputBank);
+    onAddBank(bankToUserBanks);
+  } else if (elem.classList.contains('btn-cancel')) {
+    bankInfo.innerHTML = '';
   } else if (
     elem.classList.contains('bank__name') ||
     elem.classList.contains('bank__image')
@@ -195,17 +191,28 @@ function addUserBankMarkUp() {
   const markup = `
   <input type="text" list="banklist" class="input-addbank"/>
     <datalist id="banklist">${options}</datalist>
-  <button  class="btn btn-addbank">Додати банк до списку</button>
-    `;
+    <div class="btn-wrapper">
+      <button  class="btn btn-addbank">Додати банк до списку</button>
+      <button class="btn btn-cancel">Відмінити</button>
+    </div>`;
   bankInfo.innerHTML = markup;
 
   return document.querySelector('.input-addbank');
 }
 
 function onAddBank(input) {
-  // console.log('bank :>> ', input.value);
+  // find in list of all banks
   const newBank = banks.find((bank) => input.value === bank.name);
+
+  // do not add if bank is already in favorite list
+  if (userBanks.find((bank) => bank.id === newBank.id)) return;
+
   userBanks = [...userBanks, { ...newBank }];
+
+  // =======localeStorage======================
+  saveUserBanks('user-banks', userBanks);
+  // ==========================================
+
   renderBankList(userBanks);
   choosenBank = userBanks.find((bank) => input.value === bank.name);
   onBankInfoMarkup(choosenBank);
@@ -214,34 +221,41 @@ function onAddBank(input) {
 function onBankEdit(bank) {
   // console.log('bank :>> ', bank);
   onBankEditMarkUp(bank);
-  form = document.querySelector('.form-edit');
+  formEdit = document.querySelector('.form-edit');
 
-  // form.addEventListener('submit', onAddBankSubmit, { once: true });
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
+  formEdit.addEventListener(
+    'submit',
+    (e) => {
+      e.preventDefault();
 
-    // !!!TODO
-    const newBank = { ...bank };
-    const randomID = randomiseID();
-    newBank.id = bank.id + randomID;
+      // !!!TODO
+      const newBank = { ...bank };
+      const randomID = randomiseID();
+      newBank.id = bank.id + randomID;
 
-    newBank.name =
-      bank.name === form.name.value
-        ? form.name.value + randomID
-        : form.name.value;
+      newBank.name =
+        bank.name === formEdit.name.value
+          ? formEdit.name.value + randomID
+          : formEdit.name.value;
 
-    newBank.maxLoan = Number(form.maxLoan.value);
-    newBank.interestRate = Number(form.interestRate.value);
-    newBank.minPayment = Number(form.minPayment.value);
-    newBank.loanTerm = Number(form.loanTerm.value);
-    userBanks = [...userBanks, newBank];
+      newBank.maxLoan = Number(formEdit.maxLoan.value);
+      newBank.interestRate = Number(formEdit.interestRate.value);
+      newBank.minPayment = Number(formEdit.minPayment.value);
+      newBank.loanTerm = Number(formEdit.loanTerm.value);
+      userBanks = [...userBanks, newBank];
 
-    // console.log('banks :>> ', banks);
-    // console.log('userBanks :>> ', userBanks);
-    renderBankList(userBanks);
-    bankInfo.innerHTML = '';
-    // !!!TODO
-  });
+      // =======localeStorage======================
+      saveUserBanks('user-banks', userBanks);
+      // ==========================================
+
+      // console.log('banks :>> ', banks);
+      // console.log('userBanks :>> ', userBanks);
+      renderBankList(userBanks);
+      bankInfo.innerHTML = '';
+      // !!!TODO
+    },
+    { once: true }
+  );
 }
 
 let newID = 0;
@@ -283,7 +297,9 @@ function onBankEditMarkUp(bank) {
          місяців.
       </label>
       <button type="submit" class="btn btn-editbank">Зберегти зміни</button>
+      <button class="btn btn-cancel">Відмінити</button>
     </form>`;
+
   bankInfo.innerHTML = markup;
 }
 
@@ -291,6 +307,11 @@ function onBankDelete(bank) {
   // console.log('bank :>> ', bank);
   const bankIndex = userBanks.findIndex((item) => item.id === bank.id);
   userBanks.splice(bankIndex, 1);
+
+  // ======localeStorage==========================
+  saveUserBanks('user-banks', userBanks);
+  // =============================================
+
   choosenBank = null;
   onBankInfoMarkup(choosenBank);
   renderBankList(userBanks);
